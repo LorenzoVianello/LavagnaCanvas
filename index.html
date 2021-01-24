@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lavoro Gaia</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+</head>
+<style>
+  html, body{height: 100%; width: 100%; border: none; padding: 0; margin: 0;}
+  .cols{ height: 100%;  border: none; padding: 0; margin: 0;}
+  .container-fluid{ height: 100%; width: 100%; border: none; padding: 0; margin: 0;}
+  .menu{ margin: 0 auto;vertical-align: middle;}
+  .input-color{ width: 100%; height: 80px;}
+  .menu button, .menu a, .menu input{ width: 100%; margin: 5px 0px;}
+</style>
+<body>
+  <div class="container-fluid" >
+    <div class="row" style="height: 100%; width: 100%; border: none; padding: 0; margin: 0;">
+      <div class="col-md-1 cols">
+        <div class="menu">
+          <input type="color" id="color" class="input-color form-control  ">
+          <input id="width" type="range" min="1" max="20" onchange="displayWidth()">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="fill" onchange="changeFill()">
+            <label class="form-check-label" for="fill">Riempi figure</label>
+          </div>
+          <button class="btn btn-primary" onclick="changeType('manoLibera')">Mano Libera</button>
+          <button class="btn btn-primary"  onclick="changeType('cerchio')">Cerchio</button>
+          <button class="btn btn-primary"  onclick="changeType('triangolo')">Triangolo</button>
+          <button class="btn btn-primary"  onclick="changeType('rettangolo')">Rettangolo</button>
+          <button class="btn btn-primary"  onclick="changeType('quadrato')">Quadrato</button>
+          Spessore:<h5 id="widthDisplay" style="font-weight: bold"></h5>
+          <a class="btn btn-primary" id="btnDownload" onclick="saveImg()">Salva</a>
+          <button class="btn btn-primary" onclick="clearCanvas()">Clear</button>
+        </div>
+      </div>
+      <div class="col-md-11 cols">
+        <canvas id="canvas" style="width: 100%; height: 100%; border: 1px solid black;"></canvas>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj" crossorigin="anonymous"></script>
+  <script>
+    var selected = "manoLibera",fill = false, posizioneX = 0, posizioneY = 0;
+    document.getElementById("widthDisplay").textContent = document.getElementById("width").value;
+    const canvas = document.getElementById("canvas"), context = canvas.getContext("2d");
+    canvas.style.width ='100%';
+    canvas.style.height='100%';
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    function changeType(i){
+      selected = i;
+    }
+    function changeFill(){
+      fill = !fill;
+    }
+    function clearCanvas(){
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function saveImg(){
+      document.getElementById("btnDownload").download = "image.png";
+      document.getElementById("btnDownload").href = document.getElementById("canvas").toDataURL("image/png").replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+    }
+    function displayWidth(){
+        var value = document.getElementById("width").value;
+        document.getElementById("widthDisplay").textContent = value;
+    }
+    function modificaPosizioni(event){
+        var difference = canvas.getBoundingClientRect();
+        posizioneX = event.clientX- difference.left;
+        posizioneY = event.clientY - difference.top;
+    }
+    function disegna(event){
+      context.strokeStyle = document.getElementById("color").value;
+      context.lineWidth = document.getElementById("width").value;
+      context.lineCap = 'round';
+      switch(selected){
+        case "triangolo":{
+          context.beginPath();
+          context.moveTo(posizioneX, posizioneY);
+          context.lineTo( posizioneX, posizioneY - 150);
+          context.lineTo(posizioneX + 130, posizioneY );
+          context.lineTo(posizioneX, posizioneY);
+          if(fill){
+            context.fillStyle = document.getElementById("color").value;
+            context.fill();
+          }
+          break;
+        }
+        case "quadrato":{
+          context.beginPath();
+          context.rect(posizioneX, posizioneY, 150, 150, true);
+          if(fill){
+            context.fillStyle = document.getElementById("color").value;
+            context.fill();
+          }
+          break;
+        }
+        case "rettangolo":{
+          context.beginPath();
+          context.rect(posizioneX, posizioneY, 200, 100);
+          if(fill){
+            context.fillStyle = document.getElementById("color").value;
+            context.fill();
+          }
+          break;
+        }
+        case "cerchio":{
+          context.beginPath();context.beginPath();
+          context.arc(posizioneX, posizioneY, 100, 0, Math.PI * 2, true);
+          if(fill){
+            context.fillStyle = document.getElementById("color").value;
+            context.fill();
+          }
+          break;
+        }
+      }
+      context.stroke();
+    }
+    function manoLibera(event){
+      context.strokeStyle = document.getElementById("color").value;
+      context.lineWidth = document.getElementById("width").value;
+      context.lineCap = 'round';
+      if(event.buttons === 1 && event.target.id === "canvas" && selected==="manoLibera"){
+        context.beginPath();
+        context.moveTo(posizioneX, posizioneY);
+        modificaPosizioni(event);
+        context.lineTo(posizioneX, posizioneY);
+        context.stroke();
+      }
+    }
+    document.addEventListener('mouseout', modificaPosizioni, false);
+    document.addEventListener("mousemove", manoLibera, false);
+    document.addEventListener('mousedown', modificaPosizioni, false);
+    document.addEventListener('mouseenter', modificaPosizioni, false);
+    document.getElementById("canvas").addEventListener("click", disegna, false);
+  </script>
+</body>
+</html>
